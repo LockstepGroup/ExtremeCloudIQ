@@ -69,6 +69,8 @@ foreach ($scopeId in $Config.ScopeId) {
         }
     }
 
+    $DhcpParams.Remove('ClientId')
+
 }
 
 Write-Host "$ResCount reservations added"
