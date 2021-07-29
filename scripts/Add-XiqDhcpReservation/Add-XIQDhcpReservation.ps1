@@ -1,40 +1,83 @@
-#Requires -Module DhcpServer
-#Requires -Module CorkScrew
+# #Requires -Module DhcpServer
 
 [CmdletBinding()]
 Param (
 )
 
-$DhcpServer = 'dhcp.example.com'
-$ScopeId = '172.16.0.0'
+# check/load config file
+$ConfigPath = Join-Path -Path $PSScriptRoot -ChildPath 'config.json'
 
-$ValidOUIs = @(
-    'BCF310'
-    '348584'
-    'F220E5'
-    'FF55D2'
-    'FF5AE2'
-    'FF859F'
-    'FF92F7'
-    'FFB353'
-    'FFB89D'
-    'FFCB3A'
-    'FFD00C'
-    'FFDD49'
-    'FFF679'
-    'FFF6D9'
-    'FFF77F'
-)
+if (Test-Path -Path $ConfigPath) {
+    $Config = Get-Content -Path $ConfigPath -Raw | ConvertFrom-Json
+} else {
+    Throw "config.json not found in script path: $PSScriptRoot"
+}
+
+
+# Sanitize OUIs
+$XiqOUI = @()
+foreach ($oui in $Config.XiqOUI) {
+    $oui = $oui -replace '[^a-zA-Z0-9]'
+    $oui = $oui.Substring(0, 2) + '-' + $oui.Substring(2, 2) + '-' + $oui.Substring(4, 2)
+    if ($oui.Length -ne 8) {
+        Write-Warning "invalid oui: $oui"
+    } else {
+        $XiqOUI += $oui
+    }
+}
+
 
 $DhcpParams = @{}
-$DhcpParams.ScopeId = $ScopeId
 $DhcpParams.ComputerName = $DhcpServer
 
+$ReservationCount = 0
+$RemoveReservationCount = 0
+
+foreach ($scopeId in $Config.ScopeId) {
+    Write-Verbose "ScopeId: $scopeId"
+    $DhcpParams.ScopeId = $scopeId
+
+
+    #$Leases = Get-DhcpServerv4Lease @DhcpParams
+    Write-Verbose "$($Leases.Count) Leases Found"
+
+    foreach ($lees in $Leases) {
+        $DhcpParams.ClientId = $lease.ClientId
+
+        # check for valid OUIs
+        $ThisOuiValid = $false
+        foreach ($oui in $XiqOUI) {
+            if ($lease.ClientId -match "^$oui") {
+                $ThisOuiValid = $true
+            }
+        }
+
+        # remove invalid reservations
+        if (-not $ThisOuiValid) {
+            Write-Warning "Invalid ClientID: $($lease.ClientId)"
+            if ($lease.AddressState -match 'Reservation') {
+                $RemoveResCount++
+                #$Remove = Remove-DhcpServerv4Reservation @DhcpParams
+            }
+            continue
+        }
+
+        if ($lease.AddressState -notmatch 'Reservation') {
+            Write-Host "Adding Reservation: $($lease.ClientId) -> $($lease.IpAddress)"
+            $ResCount++
+            #$Add = Add-DhcpServerv4Reservation @DhcpParams -IpAddress $lease.IpAddress
+        }
+    }
+
+}
+
+Write-Host "$ResCount reservations added"
+Write-Host "$RemoveResCount reservations removed"
+
+<#
+
+
 #Get all leases in the scope
-$Leases = Get-DhcpServerv4Lease @DhcpParams
-#Loop through the leases and convert them to reservations
-$ResCount = 0
-$RemoveResCount = 0
 
 foreach ($lease in $Leases) {
     $DhcpParams.ClientId = $lease.ClientId
@@ -66,3 +109,4 @@ foreach ($lease in $Leases) {
 Write-Host "$ResCount reservations added"
 Write-Host "$RemoveResCount reservations removed"
 
+ #>
