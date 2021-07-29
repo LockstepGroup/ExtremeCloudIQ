@@ -56,7 +56,7 @@ foreach ($scopeId in $Config.ScopeId) {
         if (-not $ThisOuiValid) {
             Write-Warning "Invalid ClientID: $($lease.ClientId)"
             if ($lease.AddressState -match 'Reservation') {
-                $RemoveResCount++
+                $RemoveReservationCount++
                 if ($Config.RemoveInvalidReservation) {
                     $Remove = Remove-DhcpServerv4Reservation @DhcpParams
                 }
@@ -64,7 +64,7 @@ foreach ($scopeId in $Config.ScopeId) {
             }
         } elseif ($lease.AddressState -notmatch 'Reservation') {
             Write-Host "Adding Reservation: $($lease.ClientId) -> $($lease.IpAddress)"
-            $ResCount++
+            $ReservationCount++
             $Add = Add-DhcpServerv4Reservation @DhcpParams -IpAddress $lease.IpAddress
         }
     }
@@ -72,11 +72,11 @@ foreach ($scopeId in $Config.ScopeId) {
     $DhcpParams.Remove('ClientId')
 }
 
-Write-Host "$ResCount reservations added"
+Write-Host "$ReservationCount reservations added"
 if ($Config.RemoveInvalidReservation) {
-    Write-Host "$RemoveResCount reservations removed"
+    Write-Host "$RemoveReservationCount reservations removed"
 } else {
-    Write-Host "$RemoveResCount reservations need to be removed"
+    Write-Host "$RemoveReservationCount reservations need to be removed"
 }
 
 <#
