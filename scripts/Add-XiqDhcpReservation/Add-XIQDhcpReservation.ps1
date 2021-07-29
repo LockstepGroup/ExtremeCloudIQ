@@ -28,7 +28,7 @@ foreach ($oui in $Config.XiqOUI) {
 
 
 $DhcpParams = @{}
-$DhcpParams.ComputerName = $DhcpServer
+$DhcpParams.ComputerName = $Config.DhcpServer
 
 $ReservationCount = 0
 $RemoveReservationCount = 0
