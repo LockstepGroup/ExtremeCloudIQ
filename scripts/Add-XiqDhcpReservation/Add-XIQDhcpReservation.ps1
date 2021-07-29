@@ -38,10 +38,10 @@ foreach ($scopeId in $Config.ScopeId) {
     $DhcpParams.ScopeId = $scopeId
 
 
-    #$Leases = Get-DhcpServerv4Lease @DhcpParams
+    $Leases = Get-DhcpServerv4Lease @DhcpParams
     Write-Verbose "$($Leases.Count) Leases Found"
 
-    foreach ($lees in $Leases) {
+    foreach ($lease in $Leases) {
         $DhcpParams.ClientId = $lease.ClientId
 
         # check for valid OUIs
