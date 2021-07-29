@@ -1,24 +1,25 @@
 {
-  "DhcpServer": "dhcp.example.com",
-  "XiqOUI": [
-    "BCF310",
-    "348584",
-    "F220E5",
-    "FF55D2",
-    "FF5AE2",
-    "FF859F",
-    "FF92F7",
-    "FFB353",
-    "FFB89D",
-    "FFCB3A",
-    "FFD00C",
-    "FFDD49",
-    "FFF679",
-    "FFF6D9",
-    "FFF77F"
-  ],
-  "ScopeId": [
-    "192.0.2.0",
-    "203.0.113.0"
-  ]
+    "DhcpServer": "dhcp.example.com",
+    "RemoveInvalidReservation": false,
+    "XiqOUI": [
+        "BCF310",
+        "348584",
+        "F220E5",
+        "FF55D2",
+        "FF5AE2",
+        "FF859F",
+        "FF92F7",
+        "FFB353",
+        "FFB89D",
+        "FFCB3A",
+        "FFD00C",
+        "FFDD49",
+        "FFF679",
+        "FFF6D9",
+        "FFF77F"
+    ],
+    "ScopeId": [
+        "192.0.2.0",
+        "203.0.113.0"
+    ]
 }

@@ -57,24 +57,28 @@ foreach ($scopeId in $Config.ScopeId) {
             Write-Warning "Invalid ClientID: $($lease.ClientId)"
             if ($lease.AddressState -match 'Reservation') {
                 $RemoveResCount++
-                #$Remove = Remove-DhcpServerv4Reservation @DhcpParams
+                if ($Config.RemoveInvalidReservation) {
+                    $Remove = Remove-DhcpServerv4Reservation @DhcpParams
+                }
+                continue
+            } elseif ($lease.AddressState -notmatch 'Reservation') {
+                Write-Host "Adding Reservation: $($lease.ClientId) -> $($lease.IpAddress)"
+                $ResCount++
+                $Add = Add-DhcpServerv4Reservation @DhcpParams -IpAddress $lease.IpAddress
             }
-            continue
         }
 
-        if ($lease.AddressState -notmatch 'Reservation') {
-            Write-Host "Adding Reservation: $($lease.ClientId) -> $($lease.IpAddress)"
-            $ResCount++
-            #$Add = Add-DhcpServerv4Reservation @DhcpParams -IpAddress $lease.IpAddress
-        }
+        $DhcpParams.Remove('ClientId')
+
     }
-
-    $DhcpParams.Remove('ClientId')
-
 }
 
 Write-Host "$ResCount reservations added"
-Write-Host "$RemoveResCount reservations removed"
+if ($Config.RemoveInvalidReservation) {
+    Write-Host "$RemoveResCount reservations removed"
+} else {
+    Write-Host "$RemoveResCount reservations need to be removed"
+}
 
 <#
 
@@ -111,4 +115,4 @@ foreach ($lease in $Leases) {
 Write-Host "$ResCount reservations added"
 Write-Host "$RemoveResCount reservations removed"
 
- #>
+#>
