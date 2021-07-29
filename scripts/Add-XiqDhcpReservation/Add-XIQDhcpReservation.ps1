@@ -1,4 +1,4 @@
-# #Requires -Module DhcpServer
+#Requires -Module DhcpServer
 
 [CmdletBinding(SupportsShouldProcess = $True)]
 Param (
